@@ -1,0 +1,2 @@
+module WebSocket.RPC where
+
