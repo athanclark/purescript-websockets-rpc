@@ -1,6 +1,7 @@
 module WebSocket.RPC
   ( RPCClientParams, RPCClient, ClientAppT, AllEffs, rpcClient
-  , WebSocketClientRPCT, execWebSocketClientRPCT
+  , module WebSocket.RPC.Trans.Client
+  , module WebSocket.RPC.Types
   ) where
 
 import Prelude

@@ -5,7 +5,7 @@ import WebSocket (newWebSocket)
 import WebSocket.RPC
 import Data.Argonaut (EncodeJson, DecodeJson, encodeJson, decodeJson)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Cancel (log)
+import Control.Monad.Eff.Console (log)
 import Control.Monad.Eff.Timer (setTimeout)
 import Control.Monad.Eff.Random (RANDOM, randomInt)
 
