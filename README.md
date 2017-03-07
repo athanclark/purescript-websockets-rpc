@@ -31,7 +31,7 @@ data MyComDSL = Qux
 
 
 
-myClient :: forall eff. ClientAppT (WebSocketClientRPCT (Eff (AllEffs eff))) Unit
+myClient :: forall eff. ClientAppT (WebSocketClientRPCT MyRepDSL MyComDSL (Eff (AllEffs eff))) Unit
 myClient = rpcClient $ \dispatch -> do
   -- could dispatch more than one subscription here
   dispatch myClient'
