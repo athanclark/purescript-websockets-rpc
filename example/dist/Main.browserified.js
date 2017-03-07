@@ -4968,7 +4968,6 @@ var PS = {};
   var Control_Monad_Eff_Console = PS["Control.Monad.Eff.Console"];
   var Control_Monad_Eff_Exception = PS["Control.Monad.Eff.Exception"];
   var Control_Monad_Eff_Ref = PS["Control.Monad.Eff.Ref"];
-  var Control_Monad_Eff_Timer = PS["Control.Monad.Eff.Timer"];
   var Control_Monad_Eff_Var = PS["Control.Monad.Eff.Var"];
   var Data_Argonaut = PS["Data.Argonaut"];
   var Data_Either = PS["Data.Either"];
@@ -5025,7 +5024,7 @@ var PS = {};
                                                       if (Data_Boolean.otherwise) {
                                                           return Control_Applicative.pure(WebSocket_RPC_Trans_Client.applicativeWebSocketClientRPCT(Control_Monad_Eff.monadEff))(Data_Unit.unit);
                                                       };
-                                                      throw new Error("Failed pattern match at WebSocket.RPC line 79, column 15 - line 81, column 48: " + [ v5.constructor.name ]);
+                                                      throw new Error("Failed pattern match at WebSocket.RPC line 77, column 15 - line 79, column 48: " + [ v5.constructor.name ]);
                                                   };
                                                   var runCom = function (v5) {
                                                       if (Data_Eq.eq(WebSocket_RPC_Types.eqRPCID)(v5._ident)(v4)) {
@@ -5036,7 +5035,7 @@ var PS = {};
                                                       if (Data_Boolean.otherwise) {
                                                           return Control_Applicative.pure(WebSocket_RPC_Trans_Client.applicativeWebSocketClientRPCT(Control_Monad_Eff.monadEff))(Data_Unit.unit);
                                                       };
-                                                      throw new Error("Failed pattern match at WebSocket.RPC line 84, column 15 - line 88, column 40: " + [ v5.constructor.name ]);
+                                                      throw new Error("Failed pattern match at WebSocket.RPC line 82, column 15 - line 86, column 40: " + [ v5.constructor.name ]);
                                                   };
                                                   return Control_Monad_Eff_Class.liftEff(WebSocket_RPC_Trans_Client.monadEffWebSocketClientRPCT(Control_Monad_Eff_Class.monadEffEff))(Control_Monad_Eff_Var.set(Control_Monad_Eff_Var.settableSettableVar)(v.onmessage)(function (event) {
                                                       var received = WebSocket.runMessage(WebSocket.runMessageEvent(event));
@@ -5051,9 +5050,9 @@ var PS = {};
                                                           if ($23.value0 instanceof WebSocket_RPC_Types.Com) {
                                                               return WebSocket_RPC_Trans_Client["runWebSocketClientRPCT'"](v2)(runCom($23.value0.value0));
                                                           };
-                                                          throw new Error("Failed pattern match at WebSocket.RPC line 96, column 26 - line 98, column 68: " + [ $23.value0.constructor.name ]);
+                                                          throw new Error("Failed pattern match at WebSocket.RPC line 94, column 26 - line 96, column 68: " + [ $23.value0.constructor.name ]);
                                                       };
-                                                      throw new Error("Failed pattern match at WebSocket.RPC line 94, column 13 - line 98, column 68: " + [ $23.constructor.name ]);
+                                                      throw new Error("Failed pattern match at WebSocket.RPC line 92, column 13 - line 96, column 68: " + [ $23.constructor.name ]);
                                                   }));
                                               });
                                           });

@@ -8,7 +8,7 @@ import Data.Generic (class Generic, gShow)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (log)
-import Control.Monad.Eff.Timer (setTimeout)
+import Control.Monad.Eff.Timer (TIMER, setTimeout)
 import Control.Monad.Eff.Random (RANDOM, randomInt)
 
 
@@ -73,7 +73,7 @@ instance decodeJsonMyComDSL :: DecodeJson MyComDSL where
     pure Qux
 
 
-myClient :: forall eff. ClientAppT (WebSocketClientRPCT MyRepDSL MyComDSL (Eff (AllEffs (random :: RANDOM | eff)))) Unit
+myClient :: forall eff. ClientAppT (WebSocketClientRPCT MyRepDSL MyComDSL (Eff (AllEffs (random :: RANDOM, timer :: TIMER | eff)))) Unit
 myClient = rpcClient \dispatch -> do
   liftEff $ log "Subscribing Foo..."
   dispatch
@@ -92,7 +92,7 @@ myClient = rpcClient \dispatch -> do
     }
 
 
-main :: forall eff. Eff (AllEffs (random :: RANDOM | eff)) Unit
+main :: forall eff. Eff (AllEffs (random :: RANDOM, timer :: TIMER | eff)) Unit
 main =
   void $ setTimeout 1000 $ do
     conn <- newWebSocket (URL "ws://localhost:8080") []

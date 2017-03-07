@@ -69,6 +69,7 @@ rpcClient userGo (Connection socket) =
               cancel :: Eff (AllEffs eff) Unit
               cancel = do
                 socket.send $ Message $ printJson $ encodeJson $ Supply $ RPCIdentified {_ident, _params: (Nothing :: Maybe Unit)}
+                socket.close
                 runWebSocketClientRPCT' env (unregisterReplyComplete _ident)
 
           registerReplyComplete _ident (onReply {supply,cancel}) onComplete
@@ -82,6 +83,7 @@ rpcClient userGo (Connection socket) =
               runCom (Complete (RPCIdentified {_ident: _ident', _params}))
                 | _ident' == _ident = do
                     runComplete _ident' _params
+                    liftEff socket.close
                     unregisterReplyComplete _ident'
                 | otherwise = pure unit
 

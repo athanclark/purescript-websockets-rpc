@@ -13,8 +13,8 @@
     "purescript-websocket-simple": "^1.0.1",
     "purescript-eff": "^2.0.0",
     "purescript-websockets-rpc": "athanclark/purescript-websockets-rpc",
-    "purescript-timers": "^1.0.0",
-    "purescript-argonaut": "^2.0.0"
+    "purescript-argonaut": "^2.0.0",
+    "purescript-js-timers": "^2.0.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^2.0.0"
