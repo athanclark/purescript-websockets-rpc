@@ -10,12 +10,11 @@ import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
-import Control.Monad.Eff.Timer (TIMER, setTimeout)
-import Control.Monad.Eff.Var (($=), get)
+import Control.Monad.Eff.Var (($=))
 import Data.Argonaut (class EncodeJson, class DecodeJson, encodeJson, decodeJson, printJson, jsonParser)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import WebSocket (Connection(Connection), runMessage, runMessageEvent, WEBSOCKET, Message(Message), ReadyState(Open))
+import WebSocket (Connection(Connection), runMessage, runMessageEvent, WEBSOCKET, Message(Message))
 import WebSocket.RPC.Trans.Client (WebSocketClientRPCT, execWebSocketClientRPCT, freshRPCID, getClientEnv, registerReplyComplete, runComplete, runReply, runWebSocketClientRPCT', unregisterReplyComplete)
 import WebSocket.RPC.Types (RPCIdentified(RPCIdentified), Subscribe(Subscribe), Supply(Supply), Reply(Reply), Complete(Complete), ServerToClient(..))
 
@@ -38,7 +37,6 @@ type ClientAppT m a = Connection -> m a
 
 type AllEffs eff =
   ( ref     :: REF
-  , timer   :: TIMER
   , err     :: EXCEPTION
   , ws      :: WEBSOCKET
   , console :: CONSOLE

@@ -1454,9 +1454,6 @@ var PS = {};
   var GettableVar = function (x) {
       return x;
   };
-  var Gettable = function (get) {
-      this.get = get;
-  };
   var Settable = function (set) {
       this.set = set;
   };
@@ -1477,12 +1474,6 @@ var PS = {};
               settable: settable
           };
       };
-  };
-  var gettableGettableVar = new Gettable(function (v) {
-      return v;
-  });
-  var get = function (dict) {
-      return dict.get;
   }; 
   var functorGettableVar = new Data_Functor.Functor(function (f) {
       return function (v) {
@@ -1506,15 +1497,12 @@ var PS = {};
           };
       };
   });
-  exports["Gettable"] = Gettable;
   exports["Settable"] = Settable;
-  exports["get"] = get;
   exports["makeGettableVar"] = makeGettableVar;
   exports["makeSettableVar"] = makeSettableVar;
   exports["makeVar"] = makeVar;
   exports["set"] = set;
   exports["invariantVar"] = invariantVar;
-  exports["gettableGettableVar"] = gettableGettableVar;
   exports["functorGettableVar"] = functorGettableVar;
   exports["settableSettableVar"] = settableSettableVar;
   exports["contravariantSettableVar"] = contravariantSettableVar;
@@ -4997,8 +4985,7 @@ var PS = {};
   var Data_Unit = PS["Data.Unit"];
   var Data_Argonaut_Decode_Class = PS["Data.Argonaut.Decode.Class"];
   var Data_Argonaut_Parser = PS["Data.Argonaut.Parser"];
-  var Data_Semigroup = PS["Data.Semigroup"];
-  var Data_Functor = PS["Data.Functor"];        
+  var Data_Semigroup = PS["Data.Semigroup"];        
   var rpcClient = function (dictEncodeJson) {
       return function (dictEncodeJson1) {
           return function (dictDecodeJson) {
@@ -5007,73 +4994,70 @@ var PS = {};
                       return function (v) {
                           var go = function (v1) {
                               return Control_Bind.bind(WebSocket_RPC_Trans_Client.bindWebSocketClientRPCT(Control_Monad_Eff.monadEff))(WebSocket_RPC_Trans_Client.getClientEnv(Control_Monad_Eff.monadEff))(function (v2) {
-                                  return Control_Bind.bind(WebSocket_RPC_Trans_Client.bindWebSocketClientRPCT(Control_Monad_Eff.monadEff))(WebSocket_RPC_Trans_Client.freshRPCID(Control_Monad_Eff_Class.monadEffEff))(function (v3) {
-                                      return Control_Bind.bind(WebSocket_RPC_Trans_Client.bindWebSocketClientRPCT(Control_Monad_Eff.monadEff))(Control_Monad_Eff_Class.liftEff(WebSocket_RPC_Trans_Client.monadEffWebSocketClientRPCT(Control_Monad_Eff_Class.monadEffEff))(Control_Monad_Eff_Var.get(Control_Monad_Eff_Var.gettableGettableVar)(v.readyState)))(function (v4) {
-                                          if (v4 instanceof WebSocket.Open) {
-                                              return Control_Bind.bind(WebSocket_RPC_Trans_Client.bindWebSocketClientRPCT(Control_Monad_Eff.monadEff))(Control_Monad_Eff_Class.liftEff(WebSocket_RPC_Trans_Client.monadEffWebSocketClientRPCT(Control_Monad_Eff_Class.monadEffEff))(v.send(WebSocket.Message(Data_Argonaut_Printer.printJson(Data_Argonaut_Printer.printerString)(Data_Argonaut_Encode_Class.encodeJson(WebSocket_RPC_Types.encodeJsonSubscribe(dictEncodeJson))(WebSocket_RPC_Types.Subscribe({
-                                                  _ident: v3, 
-                                                  _params: v1.subscription
-                                              })))))))(function () {
-                                                  var supply = function (sup) {
-                                                      return v.send(WebSocket.Message(Data_Argonaut_Printer.printJson(Data_Argonaut_Printer.printerString)(Data_Argonaut_Encode_Class.encodeJson(WebSocket_RPC_Types.encodeJsonSupply(dictEncodeJson1))(WebSocket_RPC_Types.Supply({
-                                                          _ident: v3, 
-                                                          _params: new Data_Maybe.Just(sup)
-                                                      })))));
-                                                  };
-                                                  var cancel = function __do() {
-                                                      v.send(WebSocket.Message(Data_Argonaut_Printer.printJson(Data_Argonaut_Printer.printerString)(Data_Argonaut_Encode_Class.encodeJson(WebSocket_RPC_Types.encodeJsonSupply(Data_Argonaut_Encode_Class.encodeJsonUnit))(WebSocket_RPC_Types.Supply({
-                                                          _ident: v3, 
-                                                          _params: Data_Maybe.Nothing.value
-                                                      })))))();
-                                                      return WebSocket_RPC_Trans_Client["runWebSocketClientRPCT'"](v2)(WebSocket_RPC_Trans_Client.unregisterReplyComplete(Control_Monad_Eff_Class.monadEffEff)(v3))();
-                                                  };
-                                                  return Control_Bind.bind(WebSocket_RPC_Trans_Client.bindWebSocketClientRPCT(Control_Monad_Eff.monadEff))(WebSocket_RPC_Trans_Client.registerReplyComplete(Control_Monad_Eff_Class.monadEffEff)(v3)(v1.onReply({
-                                                      supply: supply, 
-                                                      cancel: cancel
-                                                  }))(v1.onComplete))(function () {
-                                                      var runRep = function (v5) {
-                                                          if (Data_Eq.eq(WebSocket_RPC_Types.eqRPCID)(v5._ident)(v3)) {
-                                                              return WebSocket_RPC_Trans_Client.runReply(Control_Monad_Eff_Class.monadEffEff)(v3)(v5._params);
-                                                          };
-                                                          if (Data_Boolean.otherwise) {
-                                                              return Control_Applicative.pure(WebSocket_RPC_Trans_Client.applicativeWebSocketClientRPCT(Control_Monad_Eff.monadEff))(Data_Unit.unit);
-                                                          };
-                                                          throw new Error("Failed pattern match at WebSocket.RPC line 82, column 17 - line 84, column 50: " + [ v5.constructor.name ]);
+                                  return Control_Monad_Eff_Class.liftEff(WebSocket_RPC_Trans_Client.monadEffWebSocketClientRPCT(Control_Monad_Eff_Class.monadEffEff))(Control_Monad_Eff_Var.set(Control_Monad_Eff_Var.settableSettableVar)(v.onopen)(function (v3) {
+                                      return WebSocket_RPC_Trans_Client["runWebSocketClientRPCT'"](v2)(Control_Bind.bind(WebSocket_RPC_Trans_Client.bindWebSocketClientRPCT(Control_Monad_Eff.monadEff))(WebSocket_RPC_Trans_Client.freshRPCID(Control_Monad_Eff_Class.monadEffEff))(function (v4) {
+                                          return Control_Bind.bind(WebSocket_RPC_Trans_Client.bindWebSocketClientRPCT(Control_Monad_Eff.monadEff))(Control_Monad_Eff_Class.liftEff(WebSocket_RPC_Trans_Client.monadEffWebSocketClientRPCT(Control_Monad_Eff_Class.monadEffEff))(v.send(WebSocket.Message(Data_Argonaut_Printer.printJson(Data_Argonaut_Printer.printerString)(Data_Argonaut_Encode_Class.encodeJson(WebSocket_RPC_Types.encodeJsonSubscribe(dictEncodeJson))(WebSocket_RPC_Types.Subscribe({
+                                              _ident: v4, 
+                                              _params: v1.subscription
+                                          })))))))(function () {
+                                              var supply = function (sup) {
+                                                  return v.send(WebSocket.Message(Data_Argonaut_Printer.printJson(Data_Argonaut_Printer.printerString)(Data_Argonaut_Encode_Class.encodeJson(WebSocket_RPC_Types.encodeJsonSupply(dictEncodeJson1))(WebSocket_RPC_Types.Supply({
+                                                      _ident: v4, 
+                                                      _params: new Data_Maybe.Just(sup)
+                                                  })))));
+                                              };
+                                              var cancel = function __do() {
+                                                  v.send(WebSocket.Message(Data_Argonaut_Printer.printJson(Data_Argonaut_Printer.printerString)(Data_Argonaut_Encode_Class.encodeJson(WebSocket_RPC_Types.encodeJsonSupply(Data_Argonaut_Encode_Class.encodeJsonUnit))(WebSocket_RPC_Types.Supply({
+                                                      _ident: v4, 
+                                                      _params: Data_Maybe.Nothing.value
+                                                  })))))();
+                                                  return WebSocket_RPC_Trans_Client["runWebSocketClientRPCT'"](v2)(WebSocket_RPC_Trans_Client.unregisterReplyComplete(Control_Monad_Eff_Class.monadEffEff)(v4))();
+                                              };
+                                              return Control_Bind.bind(WebSocket_RPC_Trans_Client.bindWebSocketClientRPCT(Control_Monad_Eff.monadEff))(WebSocket_RPC_Trans_Client.registerReplyComplete(Control_Monad_Eff_Class.monadEffEff)(v4)(v1.onReply({
+                                                  supply: supply, 
+                                                  cancel: cancel
+                                              }))(v1.onComplete))(function () {
+                                                  var runRep = function (v5) {
+                                                      if (Data_Eq.eq(WebSocket_RPC_Types.eqRPCID)(v5._ident)(v4)) {
+                                                          return WebSocket_RPC_Trans_Client.runReply(Control_Monad_Eff_Class.monadEffEff)(v4)(v5._params);
                                                       };
-                                                      var runCom = function (v5) {
-                                                          if (Data_Eq.eq(WebSocket_RPC_Types.eqRPCID)(v5._ident)(v3)) {
-                                                              return Control_Bind.bind(WebSocket_RPC_Trans_Client.bindWebSocketClientRPCT(Control_Monad_Eff.monadEff))(WebSocket_RPC_Trans_Client.runComplete(Control_Monad_Eff_Class.monadEffEff)(v5._ident)(v5._params))(function () {
-                                                                  return WebSocket_RPC_Trans_Client.unregisterReplyComplete(Control_Monad_Eff_Class.monadEffEff)(v5._ident);
-                                                              });
-                                                          };
-                                                          if (Data_Boolean.otherwise) {
-                                                              return Control_Applicative.pure(WebSocket_RPC_Trans_Client.applicativeWebSocketClientRPCT(Control_Monad_Eff.monadEff))(Data_Unit.unit);
-                                                          };
-                                                          throw new Error("Failed pattern match at WebSocket.RPC line 87, column 17 - line 91, column 42: " + [ v5.constructor.name ]);
+                                                      if (Data_Boolean.otherwise) {
+                                                          return Control_Applicative.pure(WebSocket_RPC_Trans_Client.applicativeWebSocketClientRPCT(Control_Monad_Eff.monadEff))(Data_Unit.unit);
                                                       };
-                                                      return Control_Monad_Eff_Class.liftEff(WebSocket_RPC_Trans_Client.monadEffWebSocketClientRPCT(Control_Monad_Eff_Class.monadEffEff))(Control_Monad_Eff_Var.set(Control_Monad_Eff_Var.settableSettableVar)(v.onmessage)(function (event) {
-                                                          var received = WebSocket.runMessage(WebSocket.runMessageEvent(event));
-                                                          var $24 = Control_Bind.bindFlipped(Data_Either.bindEither)(Data_Argonaut_Decode_Class.decodeJson(WebSocket_RPC_Types.decodeJsonServerToClient(dictDecodeJson)(dictDecodeJson1)))(Data_Argonaut_Parser.jsonParser(received));
-                                                          if ($24 instanceof Data_Either.Left) {
-                                                              return Control_Monad_Eff_Console.log("WebSocket parse error: " + $24.value0);
+                                                      throw new Error("Failed pattern match at WebSocket.RPC line 79, column 15 - line 81, column 48: " + [ v5.constructor.name ]);
+                                                  };
+                                                  var runCom = function (v5) {
+                                                      if (Data_Eq.eq(WebSocket_RPC_Types.eqRPCID)(v5._ident)(v4)) {
+                                                          return Control_Bind.bind(WebSocket_RPC_Trans_Client.bindWebSocketClientRPCT(Control_Monad_Eff.monadEff))(WebSocket_RPC_Trans_Client.runComplete(Control_Monad_Eff_Class.monadEffEff)(v5._ident)(v5._params))(function () {
+                                                              return WebSocket_RPC_Trans_Client.unregisterReplyComplete(Control_Monad_Eff_Class.monadEffEff)(v5._ident);
+                                                          });
+                                                      };
+                                                      if (Data_Boolean.otherwise) {
+                                                          return Control_Applicative.pure(WebSocket_RPC_Trans_Client.applicativeWebSocketClientRPCT(Control_Monad_Eff.monadEff))(Data_Unit.unit);
+                                                      };
+                                                      throw new Error("Failed pattern match at WebSocket.RPC line 84, column 15 - line 88, column 40: " + [ v5.constructor.name ]);
+                                                  };
+                                                  return Control_Monad_Eff_Class.liftEff(WebSocket_RPC_Trans_Client.monadEffWebSocketClientRPCT(Control_Monad_Eff_Class.monadEffEff))(Control_Monad_Eff_Var.set(Control_Monad_Eff_Var.settableSettableVar)(v.onmessage)(function (event) {
+                                                      var received = WebSocket.runMessage(WebSocket.runMessageEvent(event));
+                                                      var $23 = Control_Bind.bindFlipped(Data_Either.bindEither)(Data_Argonaut_Decode_Class.decodeJson(WebSocket_RPC_Types.decodeJsonServerToClient(dictDecodeJson)(dictDecodeJson1)))(Data_Argonaut_Parser.jsonParser(received));
+                                                      if ($23 instanceof Data_Either.Left) {
+                                                          return Control_Monad_Eff_Console.log("WebSocket parse error: " + $23.value0);
+                                                      };
+                                                      if ($23 instanceof Data_Either.Right) {
+                                                          if ($23.value0 instanceof WebSocket_RPC_Types.Rep) {
+                                                              return WebSocket_RPC_Trans_Client["runWebSocketClientRPCT'"](v2)(runRep($23.value0.value0));
                                                           };
-                                                          if ($24 instanceof Data_Either.Right) {
-                                                              if ($24.value0 instanceof WebSocket_RPC_Types.Rep) {
-                                                                  return WebSocket_RPC_Trans_Client["runWebSocketClientRPCT'"](v2)(runRep($24.value0.value0));
-                                                              };
-                                                              if ($24.value0 instanceof WebSocket_RPC_Types.Com) {
-                                                                  return WebSocket_RPC_Trans_Client["runWebSocketClientRPCT'"](v2)(runCom($24.value0.value0));
-                                                              };
-                                                              throw new Error("Failed pattern match at WebSocket.RPC line 99, column 28 - line 101, column 70: " + [ $24.value0.constructor.name ]);
+                                                          if ($23.value0 instanceof WebSocket_RPC_Types.Com) {
+                                                              return WebSocket_RPC_Trans_Client["runWebSocketClientRPCT'"](v2)(runCom($23.value0.value0));
                                                           };
-                                                          throw new Error("Failed pattern match at WebSocket.RPC line 97, column 15 - line 101, column 70: " + [ $24.constructor.name ]);
-                                                      }));
-                                                  });
+                                                          throw new Error("Failed pattern match at WebSocket.RPC line 96, column 26 - line 98, column 68: " + [ $23.value0.constructor.name ]);
+                                                      };
+                                                      throw new Error("Failed pattern match at WebSocket.RPC line 94, column 13 - line 98, column 68: " + [ $23.constructor.name ]);
+                                                  }));
                                               });
-                                          };
-                                          return Data_Functor["void"](WebSocket_RPC_Trans_Client.functorWebSocketClientRPCT(Control_Monad_Eff.functorEff))(Control_Monad_Eff_Class.liftEff(WebSocket_RPC_Trans_Client.monadEffWebSocketClientRPCT(Control_Monad_Eff_Class.monadEffEff))(Control_Monad_Eff_Timer.setTimeout(1000)(WebSocket_RPC_Trans_Client["runWebSocketClientRPCT'"](v2)(go(v1)))));
-                                      });
-                                  });
+                                          });
+                                      }));
+                                  }));
                               });
                           };
                           return userGo(go);
