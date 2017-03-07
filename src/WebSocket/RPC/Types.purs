@@ -5,6 +5,8 @@ import Data.Argonaut (class EncodeJson, class DecodeJson, encodeJson, decodeJson
 import Data.Generic (class Generic, gShow, gEq, gCompare)
 import Data.Enum (class Enum, pred, succ)
 import Data.Maybe (Maybe)
+import Data.Either (Either(Left))
+import Control.Alternative ((<|>))
 
 
 newtype RPCID = RPCID Int
@@ -73,10 +75,15 @@ instance showSubscribe :: (Show a, Generic a) => Show (Subscribe a) where
   show = gShow
 
 instance encodeJsonSubscribe :: (EncodeJson a) => EncodeJson (Subscribe a) where
-  encodeJson (Subscribe x) = encodeJson x
+  encodeJson (Subscribe x) = "type" := encodeJson "sub" ~> encodeJson x
 
 instance decodeJsonSubscribe :: (DecodeJson a) => DecodeJson (Subscribe a) where
-  decodeJson = map Subscribe <<< decodeJson
+  decodeJson json = do
+    o <- decodeJson json
+    t <- o .? "type"
+    if t == "sub"
+      then Subscribe <$> decodeJson json
+      else Left "Not a sub"
 
 
 newtype Supply a = Supply (RPCIdentified (Maybe a))
@@ -90,10 +97,15 @@ instance showSupply :: (Show a, Generic a) => Show (Supply a) where
   show = gShow
 
 instance encodeJsonSupply :: (EncodeJson a) => EncodeJson (Supply a) where
-  encodeJson (Supply x) = encodeJson x
+  encodeJson (Supply x) = "type" := encodeJson "sup" ~> encodeJson x
 
 instance decodeJsonSupply :: (DecodeJson a) => DecodeJson (Supply a) where
-  decodeJson = map Supply <<< decodeJson
+  decodeJson json = do
+    o <- decodeJson json
+    t <- o .? "type"
+    if t == "sup"
+      then Supply <$> decodeJson json
+      else Left "Not a sup"
 
 
 newtype Reply a = Reply (RPCIdentified a)
@@ -107,10 +119,15 @@ instance showReply :: (Show a, Generic a) => Show (Reply a) where
   show = gShow
 
 instance encodeJsonReply :: (EncodeJson a) => EncodeJson (Reply a) where
-  encodeJson (Reply x) = encodeJson x
+  encodeJson (Reply x) = "type" := encodeJson "rep" ~> encodeJson x
 
 instance decodeJsonReply :: (DecodeJson a) => DecodeJson (Reply a) where
-  decodeJson = map Reply <<< decodeJson
+  decodeJson json = do
+    o <- decodeJson json
+    t <- o .? "type"
+    if t == "rep"
+      then Reply <$> decodeJson json
+      else Left "Not a rep"
 
 
 newtype Complete a = Complete (RPCIdentified a)
@@ -124,7 +141,32 @@ instance showComplete :: (Show a, Generic a) => Show (Complete a) where
   show = gShow
 
 instance encodeJsonComplete :: (EncodeJson a) => EncodeJson (Complete a) where
-  encodeJson (Complete x) = encodeJson x
+  encodeJson (Complete x) = "type" := encodeJson "com" ~> encodeJson x
 
 instance decodeJsonComplete :: (DecodeJson a) => DecodeJson (Complete a) where
-  decodeJson = map Complete <<< decodeJson
+  decodeJson json = do
+    o <- decodeJson json
+    t <- o .? "type"
+    if t == "com"
+      then Complete <$> decodeJson json
+      else Left "Not a com"
+
+
+data ServerToClient rep com
+  = Rep (Reply rep)
+  | Com (Complete com)
+
+derive instance genericServerToClient :: (Generic rep, Generic com) => Generic (ServerToClient rep com)
+
+instance showServerToClient :: (Generic rep, Show rep, Generic com, Show com) => Show (ServerToClient rep com) where
+  show = gShow
+
+instance eqServerToClient :: (Generic rep, Eq rep, Generic com, Eq com) => Eq (ServerToClient rep com) where
+  eq = gEq
+
+instance encodeJsonServerToClient :: (EncodeJson rep, EncodeJson com) => EncodeJson (ServerToClient rep com) where
+  encodeJson (Rep x) = encodeJson x
+  encodeJson (Com x) = encodeJson x
+
+instance decodeJsonServerToClient :: (DecodeJson rep, DecodeJson com) => DecodeJson (ServerToClient rep com) where
+  decodeJson json = (Rep <$> decodeJson json) <|> (Com <$> decodeJson json)

@@ -12,7 +12,9 @@
     "purescript-websocket-simple": "^1.0.1",
     "purescript-argonaut": "^2.0.0",
     "purescript-enums": "^2.0.1",
-    "purescript-maps": "^2.1.2"
+    "purescript-maps": "^2.1.2",
+    "purescript-js-timers": "^2.0.0",
+    "purescript-refs": "^2.0.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^2.0.0"
