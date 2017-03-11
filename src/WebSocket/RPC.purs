@@ -96,5 +96,6 @@ rpcClient userGo (Connection socket) =
               Right x -> case x of
                 Rep rep -> runWebSocketClientRPCT' env (runRep rep)
                 Com com -> runWebSocketClientRPCT' env (runCom com)
+                Ping    -> socket.send $ Message $ printJson $ encodeJson ([] :: Array Unit)
 
   in  userGo go

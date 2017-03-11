@@ -155,6 +155,7 @@ instance decodeJsonComplete :: (DecodeJson a) => DecodeJson (Complete a) where
 data ServerToClient rep com
   = Rep (Reply rep)
   | Com (Complete com)
+  | Ping
 
 derive instance genericServerToClient :: (Generic rep, Generic com) => Generic (ServerToClient rep com)
 
@@ -167,6 +168,10 @@ instance eqServerToClient :: (Generic rep, Eq rep, Generic com, Eq com) => Eq (S
 instance encodeJsonServerToClient :: (EncodeJson rep, EncodeJson com) => EncodeJson (ServerToClient rep com) where
   encodeJson (Rep x) = encodeJson x
   encodeJson (Com x) = encodeJson x
+  encodeJson Ping    = encodeJson ([] :: Array Unit)
 
 instance decodeJsonServerToClient :: (DecodeJson rep, DecodeJson com) => DecodeJson (ServerToClient rep com) where
-  decodeJson json = (Rep <$> decodeJson json) <|> (Com <$> decodeJson json)
+  decodeJson json
+     =  (Rep <$> decodeJson json)
+    <|> (Com <$> decodeJson json)
+    <|> (Ping <$ (decodeJson json :: Either String (Array Unit)))
