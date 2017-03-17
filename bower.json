@@ -1,5 +1,6 @@
 {
   "name": "purescript-websockets-rpc",
+  "license": "BSD-3-Clause",
   "ignore": [
     "**/.*",
     "node_modules",
