@@ -82,7 +82,7 @@ rpcClient userGo (Connection socket) =
               runCom (Complete (RPCIdentified {_ident: _ident', _params}))
                 | _ident' == _ident = do
                     runComplete _ident' _params
-                    unregisterReplyComplete _ident'
+                    -- unregisterReplyComplete _ident'
                 | otherwise = pure unit
 
           liftEff $ socket.onmessage $= \event -> do
