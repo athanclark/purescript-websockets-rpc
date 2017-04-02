@@ -12,7 +12,7 @@
     "purescript-random": "^2.0.0",
     "purescript-websocket-simple": "^1.0.1",
     "purescript-eff": "^2.0.0",
-    "purescript-websockets-rpc": "../",
+    "purescript-websockets-rpc": "../#f0c853459267384e77480a54c8854873699c0115",
     "purescript-argonaut": "^2.0.0",
     "purescript-js-timers": "^2.0.0"
   },
