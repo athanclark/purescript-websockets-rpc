@@ -74,7 +74,7 @@ instance decodeJsonMyComDSL :: DecodeJson MyComDSL where
 
 
 myClient :: forall eff. ClientAppT (WebSocketClientRPCT MyRepDSL MyComDSL (Eff (AllEffs (random :: RANDOM, timer :: TIMER | eff)))) Unit
-myClient = rpcClient \dispatch -> do
+myClient = rpcClient id $ \dispatch -> do
   liftEff $ log "Subscribing Foo..."
   dispatch
     { subscription: Foo

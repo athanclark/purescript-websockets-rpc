@@ -6,8 +6,8 @@ module WebSocket.RPC
 
 import Prelude
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (log, CONSOLE)
+import Control.Monad.Eff.Class (class MonadEff, liftEff)
+import Control.Monad.Eff.Console (warn, CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Var (($=))
@@ -43,42 +43,48 @@ type AllEffs eff =
   | eff)
 
 
-rpcClient :: forall sub sup rep com eff
+-- | Given a (forgetful) natural transformation from `m` to `Eff`, and usage of a `dispatch` function,
+--   create a `ClientAppT`. Note - it is your job to make sure `liftEff` and `runM` form an isomorphism -
+--   if there is dangling state, I suggest storing it in a Ref instead of value-passing, so the read-only
+--   monad environment is decoupled from the value of the monad.
+rpcClient :: forall sub sup rep com eff m
            . ( EncodeJson sub
              , EncodeJson sup
              , DecodeJson rep
              , DecodeJson com
+             , MonadEff (AllEffs eff) m
              )
-          => (( RPCClient sub sup rep com (Eff (AllEffs eff)) -> WebSocketClientRPCT rep com (Eff (AllEffs eff)) Unit)
-                -> WebSocketClientRPCT rep com (Eff (AllEffs eff)) Unit)
-          -> ClientAppT (WebSocketClientRPCT rep com (Eff (AllEffs eff))) Unit
-rpcClient userGo (Connection socket) =
-  let go :: RPCClient sub sup rep com (Eff (AllEffs eff)) -> WebSocketClientRPCT rep com (Eff (AllEffs eff)) Unit
+          => (forall a. m a -> Eff (AllEffs eff) a)
+          -> ( (RPCClient sub sup rep com m -> WebSocketClientRPCT rep com m Unit)
+             -> WebSocketClientRPCT rep com m Unit)
+          -> ClientAppT (WebSocketClientRPCT rep com m) Unit
+rpcClient runM userGo (Connection socket) =
+  let go :: RPCClient sub sup rep com m -> WebSocketClientRPCT rep com m Unit
       go params@{subscription,onReply,onComplete} = do
         env <- getClientEnv
 
-        liftEff $ socket.onopen $= \_ -> runWebSocketClientRPCT' env $ do
+        liftEff $ socket.onopen $= \_ -> runM $ runWebSocketClientRPCT' env $ do
           _ident <- freshRPCID
 
           liftEff $ socket.send $ Message $ printJson $ encodeJson $ Subscribe $ RPCIdentified {_ident, _params: subscription}
 
-          let supply :: sup -> Eff (AllEffs eff) Unit
+          let supply :: sup -> m Unit
               supply sup =
-                socket.send $ Message $ printJson $ encodeJson $ Supply $ RPCIdentified {_ident, _params: Just sup}
+                liftEff $ socket.send $ Message $ printJson $ encodeJson $ Supply $ RPCIdentified {_ident, _params: Just sup}
 
-              cancel :: Eff (AllEffs eff) Unit
+              cancel :: m Unit
               cancel = do
-                socket.send $ Message $ printJson $ encodeJson $ Supply $ RPCIdentified {_ident, _params: (Nothing :: Maybe Unit)}
+                liftEff $ socket.send $ Message $ printJson $ encodeJson $ Supply $ RPCIdentified {_ident, _params: (Nothing :: Maybe Unit)}
                 runWebSocketClientRPCT' env (unregisterReplyComplete _ident)
 
           registerReplyComplete _ident (onReply {supply,cancel}) onComplete
 
-          let runRep :: Reply rep -> WebSocketClientRPCT rep com (Eff (AllEffs eff)) Unit
+          let runRep :: Reply rep -> WebSocketClientRPCT rep com m Unit
               runRep (Reply (RPCIdentified {_ident: _ident', _params}))
                 | _ident' == _ident = runReply _ident _params
                 | otherwise         = pure unit -- FIXME throw warning?
 
-              runCom :: Complete com -> WebSocketClientRPCT rep com (Eff (AllEffs eff)) Unit
+              runCom :: Complete com -> WebSocketClientRPCT rep com m Unit
               runCom (Complete (RPCIdentified {_ident: _ident', _params}))
                 | _ident' == _ident = do
                     runComplete _ident' _params
@@ -90,10 +96,10 @@ rpcClient userGo (Connection socket) =
                 received = runMessage (runMessageEvent event)
 
             case decodeJson =<< jsonParser received of
-              Left err -> log $ "WebSocket parse error: " <> err
-              Right x -> case x of
+              Left err -> warn $ "WebSocket parse error: " <> err
+              Right x -> runM $ case x of
                 Rep rep -> runWebSocketClientRPCT' env (runRep rep)
                 Com com -> runWebSocketClientRPCT' env (runCom com)
-                Ping    -> socket.send $ Message $ printJson $ encodeJson ([] :: Array Unit)
+                Ping    -> liftEff $ socket.send $ Message $ printJson $ encodeJson ([] :: Array Unit)
 
   in  userGo go
