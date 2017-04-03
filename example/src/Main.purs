@@ -1,15 +1,17 @@
 module Main where
 
 import Prelude
-import WebSocket (newWebSocket, URL (URL))
+import WebSocket (WEBSOCKET)
 import WebSocket.RPC
 import Data.Argonaut (class EncodeJson, class DecodeJson, encodeJson, decodeJson)
 import Data.Generic (class Generic, gShow)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (log)
+import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Timer (TIMER, setTimeout)
 import Control.Monad.Eff.Random (RANDOM, randomInt)
+import Control.Monad.Eff.Ref (REF)
+import Control.Monad.Eff.Exception (EXCEPTION)
 
 
 data MySubDSL = Foo
@@ -73,7 +75,16 @@ instance decodeJsonMyComDSL :: DecodeJson MyComDSL where
     pure Qux
 
 
-myClient :: forall eff. ClientAppT (WebSocketClientRPCT MyRepDSL MyComDSL (Eff (AllEffs (random :: RANDOM, timer :: TIMER | eff)))) Unit
+myClient :: forall eff
+          . {url :: String, protocols :: Array String}
+         -> (WebSocketClientRPCT MyRepDSL MyComDSL
+               (Eff ( ws :: WEBSOCKET
+                    , ref :: REF
+                    , err :: EXCEPTION
+                    , console :: CONSOLE
+                    , random :: RANDOM
+                    , timer :: TIMER
+                    | eff))) Unit
 myClient = rpcClient id $ \dispatch -> do
   liftEff $ log "Subscribing Foo..."
   dispatch
@@ -92,8 +103,14 @@ myClient = rpcClient id $ \dispatch -> do
     }
 
 
-main :: forall eff. Eff (AllEffs (random :: RANDOM, timer :: TIMER | eff)) Unit
+main :: forall eff
+      . Eff ( ws :: WEBSOCKET
+            , ref :: REF
+            , err :: EXCEPTION
+            , console :: CONSOLE
+            , random :: RANDOM
+            , timer :: TIMER
+            | eff) Unit
 main =
-  void $ setTimeout 1000 $ do
-    conn <- newWebSocket (URL "ws://localhost:8080") []
-    execWebSocketClientRPCT $ myClient conn
+  void $ setTimeout 1000 $
+    execWebSocketClientRPCT $ myClient {url : "ws://localhost:8080", protocols : []}
