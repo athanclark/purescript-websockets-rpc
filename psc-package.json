@@ -1,0 +1,13 @@
+{
+    "name": "purescript-websockets-rpc",
+    "set": "psc-0.10.7",
+    "source": "https://github.com/purescript/package-sets.git",
+    "depends": [
+        "argonaut",
+        "refs",
+        "exceptions",
+        "console",
+        "eff",
+        "prelude"
+    ]
+}
