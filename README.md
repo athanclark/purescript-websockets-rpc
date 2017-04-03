@@ -3,7 +3,7 @@ purescript-websockets-rpc
 
 
 for use with a [websockets-rpc](https://hackage.haskell.org/package/websockets-rpc)-compliant websocket server,
-the [purescript-websocket-simple](https://pursuit.purescript.org/packages/purescript-websocket-simple) client
+the [purescript-websocket-moderate](https://pursuit.purescript.org/packages/purescript-websocket-moderate) client
 library, and [purescript-argonaut](https://github.com/purescript-contrib/purescript-argonaut) json serialization
 system.
 
@@ -14,6 +14,7 @@ Example
 
 ```purescript
 import WebSocket.RPC
+import WebSocket (WEBSOCKET)
 
 data MySubDSL = Foo
   deriving (EncodeJson, DecodeJson) -- you should figure this out
@@ -29,9 +30,9 @@ data MyComDSL = Qux
 
 
 
-
-
-myClient :: forall eff. ClientAppT (WebSocketClientRPCT MyRepDSL MyComDSL (Eff (AllEffs eff))) Unit
+myClient :: forall eff
+          . {url :: String, protocols :: Array String}
+         -> (WebSocketClientRPCT MyRepDSL MyComDSL (Eff _) Unit
 myClient = rpcClient $ \dispatch -> do
   -- could dispatch more than one subscription here
   dispatch myClient'
@@ -48,7 +49,8 @@ myClient = rpcClient $ \dispatch -> do
       
       
 main :: Eff _ Unit
-main = do
-  conn <- newWebSocket (URL "localhost") []
-  execWebSocketClientRPCT (myClient conn)
+main =
+  execWebSocketClientRPCT $ myClient {url: "ws://localhost", protocols: []}
 ```
+
+see the `example/` folder for a working one
