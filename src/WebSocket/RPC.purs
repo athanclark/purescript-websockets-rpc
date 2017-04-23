@@ -91,10 +91,8 @@ rpcClient runM userGo {url,protocols} =
 
                       runCom :: Complete com -> WebSocketClientRPCT rep com m Unit
                       runCom (Complete (RPCIdentified {_ident: _ident', _params}))
-                        | _ident' == _ident = do
-                            runComplete _ident' _params
-                            -- unregisterReplyComplete _ident'
-                        | otherwise = pure unit
+                        | _ident' == _ident = runComplete _ident' _params
+                        | otherwise         = pure unit
 
                   case decodeJson =<< jsonParser received of
                     Left err -> liftEff $ warn $ "WebSocket parse error: " <> err
