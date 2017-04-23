@@ -10,6 +10,7 @@ import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Console (warn, log, errorShow, CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
+import Control.Monad.Trans.Class (lift)
 import Data.Argonaut (class EncodeJson, class DecodeJson, encodeJson, decodeJson, printJson, jsonParser)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
@@ -27,6 +28,7 @@ type RPCClientParams sup m =
 
 type RPCClient sub sup rep com m =
   { subscription :: sub
+  , onSubscribe  :: RPCClientParams sup m -> m Unit
   , onReply      :: RPCClientParams sup m -> rep -> m Unit
   , onComplete   :: com -> m Unit
   }
@@ -50,7 +52,7 @@ rpcClient :: forall sub sup rep com eff m
           -> (WebSocketClientRPCT rep com m) Unit
 rpcClient runM userGo {url,protocols} =
   let go :: RPCClient sub sup rep com m -> WebSocketClientRPCT rep com m Unit
-      go params@{subscription,onReply,onComplete} = do
+      go params@{subscription,onSubscribe,onReply,onComplete} = do
         env <- getClientEnv
 
         _ident <- freshRPCID
@@ -77,6 +79,8 @@ rpcClient runM userGo {url,protocols} =
                       cancel = runWebSocketClientRPCT' env $ do
                         send $ printJson $ encodeJson $ Supply $ RPCIdentified {_ident, _params: (Nothing :: Maybe Unit)}
                         unregisterReplyComplete _ident
+
+                  lift (onSubscribe {supply,cancel})
 
                   registerReplyComplete _ident (onReply {supply,cancel}) onComplete
               , onmessage: \{send} received -> do
