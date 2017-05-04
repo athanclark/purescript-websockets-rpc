@@ -9,11 +9,13 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Console (warn, log, errorShow, CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION)
-import Control.Monad.Eff.Ref (REF)
+import Control.Monad.Eff.Ref (REF, newRef, readRef, writeRef)
+import Control.Monad.Eff.Timer (TIMER, setTimeout)
 import Control.Monad.Trans.Class (lift)
 import Data.Argonaut (class EncodeJson, class DecodeJson, encodeJson, decodeJson, printJson, jsonParser)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Data.Int (pow)
 import WebSocket (WEBSOCKET)
 import WebSocket.Class (newWebSocket)
 import WebSocket.RPC.Trans.Client (WebSocketClientRPCT, execWebSocketClientRPCT, freshRPCID, getClientEnv, registerReplyComplete, runComplete, runReply, runWebSocketClientRPCT', unregisterReplyComplete)
@@ -43,14 +45,16 @@ rpcClient :: forall sub sup rep com eff m
              , EncodeJson sup
              , DecodeJson rep
              , DecodeJson com
-             , MonadEff (ref :: REF, err :: EXCEPTION, ws :: WEBSOCKET, console :: CONSOLE | eff) m
+             , MonadEff (ref :: REF, err :: EXCEPTION, ws :: WEBSOCKET, console :: CONSOLE, timer :: TIMER | eff) m
              )
-          => (forall a. m a -> Eff (ref :: REF, err :: EXCEPTION, ws :: WEBSOCKET, console :: CONSOLE | eff) a)
+          => (forall a. m a -> Eff (ref :: REF, err :: EXCEPTION, ws :: WEBSOCKET, console :: CONSOLE, timer :: TIMER | eff) a)
           -> ( (RPCClient sub sup rep com m -> WebSocketClientRPCT rep com m Unit)
              -> WebSocketClientRPCT rep com m Unit)
           -> {url :: String, protocols :: Array String}
           -> (WebSocketClientRPCT rep com m) Unit
-rpcClient runM userGo {url,protocols} =
+rpcClient runM userGo {url,protocols} = do
+  spentWaiting <- liftEff $ newRef 0
+
   let go :: RPCClient sub sup rep com m -> WebSocketClientRPCT rep com m Unit
       go params@{subscription,onSubscribe,onReply,onComplete} = do
         env <- getClientEnv
@@ -67,8 +71,18 @@ rpcClient runM userGo {url,protocols} =
                   log $ "reason:    " <> show reason
                   log $ "was clean: " <> show wasClean
                   log   "--------------------------"
+                  log ""
+
+                  toWait <- readRef spentWaiting
+                  let toWait' = pow 2 toWait
+                  log $ "websocket disconnected - waiting " <> show toWait' <> " seconds before trying again..."
+
+                  void $ setTimeout (1000 * toWait') $
+                    runM $ runWebSocketClientRPCT' env $ go params
               , onerror: \e -> liftEff $ errorShow e
               , onopen: \{send} -> do
+                  liftEff $ writeRef spentWaiting 0
+
                   send $ printJson $ encodeJson $ Subscribe $ RPCIdentified {_ident, _params: subscription}
 
                   let supply :: sup -> m Unit
@@ -103,4 +117,4 @@ rpcClient runM userGo {url,protocols} =
               }
           }
 
-  in  userGo go
+  userGo go

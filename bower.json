@@ -19,7 +19,8 @@
     "purescript-maps": "^2.1.2",
     "purescript-refs": "^2.0.0",
     "purescript-websocket-moderate": "^0.0.1",
-    "purescript-transformers": "2.3.0"
+    "purescript-transformers": "2.3.0",
+    "purescript-js-timers": "2.x"
   },
   "devDependencies": {
     "purescript-psci-support": "~2.0.0"
