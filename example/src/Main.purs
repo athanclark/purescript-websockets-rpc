@@ -89,6 +89,8 @@ myClient = rpcClient id $ \dispatch -> do
   liftEff $ log "Subscribing Foo..."
   dispatch
     { subscription: Foo
+    , onSubscribe: \_ -> do
+        log "subscribed..."
     , onReply: \{supply,cancel} Baz -> do
         log $ show Baz
         void $ setTimeout 1000 $ do
@@ -111,6 +113,7 @@ main :: forall eff
             , random :: RANDOM
             , timer :: TIMER
             | eff) Unit
-main =
+main = do
+  log "test..."
   void $ setTimeout 1000 $
     execWebSocketClientRPCT $ myClient {url : "ws://localhost:8080", protocols : []}

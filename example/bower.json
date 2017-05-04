@@ -11,7 +11,7 @@
     "purescript-console": "^2.0.0",
     "purescript-random": "^2.0.0",
     "purescript-eff": "^2.0.0",
-    "purescript-websockets-rpc": "../#889169c7932f52e8537466464c844da8853289a2",
+    "purescript-websockets-rpc": "../#ade7894b2b8af1970e10115f5873e787d546c77c",
     "purescript-argonaut": "^2.0.0",
     "purescript-js-timers": "^2.0.0"
   },

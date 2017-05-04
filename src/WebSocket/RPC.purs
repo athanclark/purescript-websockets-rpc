@@ -74,6 +74,7 @@ rpcClient runM userGo {url,protocols} = do
                   log ""
 
                   toWait <- readRef spentWaiting
+                  writeRef spentWaiting (toWait + 1)
                   let toWait' = pow 2 toWait
                   log $ "websocket disconnected - waiting " <> show toWait' <> " seconds before trying again..."
 
@@ -81,6 +82,7 @@ rpcClient runM userGo {url,protocols} = do
                     runM $ runWebSocketClientRPCT' env $ go params
               , onerror: \e -> liftEff $ errorShow e
               , onopen: \{send} -> do
+                  liftEff $ log "Opened!"
                   liftEff $ writeRef spentWaiting 0
 
                   send $ printJson $ encodeJson $ Subscribe $ RPCIdentified {_ident, _params: subscription}
