@@ -82,7 +82,6 @@ rpcClient runM userGo {url,protocols} = do
                     runM $ runWebSocketClientRPCT' env $ go params
               , onerror: \e -> liftEff $ errorShow e
               , onopen: \{send} -> do
-                  liftEff $ log "Opened!"
                   liftEff $ writeRef spentWaiting 0
 
                   send $ printJson $ encodeJson $ Subscribe $ RPCIdentified {_ident, _params: subscription}
