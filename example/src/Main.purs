@@ -3,8 +3,10 @@ module Main where
 import Prelude
 import WebSocket (WEBSOCKET)
 import WebSocket.RPC
+import WebSocket.RPC.ACKable (ackableRPCClient)
 import Data.Argonaut (class EncodeJson, class DecodeJson, encodeJson, decodeJson)
 import Data.Generic (class Generic, gShow)
+import Data.UUID (GENUUID)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
@@ -76,33 +78,26 @@ instance decodeJsonMyComDSL :: DecodeJson MyComDSL where
 
 
 myClient :: forall eff
-          . {url :: String, protocols :: Array String}
-         -> (WebSocketClientRPCT MyRepDSL MyComDSL
+          . RPCClient MySubDSL MySupDSL MyRepDSL MyComDSL
                (Eff ( ws :: WEBSOCKET
                     , ref :: REF
                     , err :: EXCEPTION
                     , console :: CONSOLE
                     , random :: RANDOM
                     , timer :: TIMER
-                    | eff))) Unit
-myClient = rpcClient id $ \dispatch -> do
-  liftEff $ log "Subscribing Foo..."
-  dispatch
-    { subscription: Foo
-    , onSubscribe: \_ -> do
-        log "subscribed..."
-    , onReply: \{supply,cancel} Baz -> do
-        log $ show Baz
-        void $ setTimeout 1000 $ do
-          log "supplying Bar..."
-          supply Bar
-          q <- randomInt 0 9
-          when (q == 0) $ do
-            log "Canceling..."
-            cancel
-    , onComplete: \Qux ->
-        log $ show Qux
-    }
+                    | eff))
+myClient =
+  { subscription: Foo
+  , onSubscribe: \_ -> do
+      log "subscribed..."
+  , onReply: \{supply,cancel} Baz -> do
+      log $ show Baz
+      void $ setTimeout 1000 $ do
+        log "supplying Bar..."
+        supply Bar
+  , onComplete: \Qux ->
+      log $ show Qux
+  }
 
 
 main :: forall eff
@@ -112,8 +107,14 @@ main :: forall eff
             , console :: CONSOLE
             , random :: RANDOM
             , timer :: TIMER
+            , uuid :: GENUUID
             | eff) Unit
 main = do
+  let runM = id
   log "test..."
-  void $ setTimeout 1000 $
-    execWebSocketClientRPCT $ myClient {url : "ws://localhost:8080", protocols : []}
+  client <- ackableRPCClient runM "client" myClient
+  void $ setTimeout 1000 $ execWebSocketClientRPCT $
+    rpcClient runM (\dispatch -> do
+        liftEff $ log "Subscribing Foo..."
+        dispatch client)
+      {url : "ws://localhost:8080", protocols : []}
