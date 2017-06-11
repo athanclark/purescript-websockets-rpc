@@ -110,7 +110,7 @@ rpcClient runM userGo {url,protocols} = do
                         | otherwise         = pure unit
 
                   case decodeJson =<< jsonParser received of
-                    Left err -> liftEff $ warn $ "WebSocket parse error: " <> err
+                    Left err -> liftEff $ warn $ "WebSocket parse error: " <> err <> ", received: " <> show received
                     Right x -> case x of
                       Rep rep -> runRep rep
                       Com com -> runCom com
